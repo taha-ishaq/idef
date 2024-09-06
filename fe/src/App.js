@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 
 import { Editor } from '@monaco-editor/react';
 
-const socket = io('http://localhost:3000');
+const socket = io('https://ide-tawny.vercel.app/');
 
 function App() {
   const [code, setCode] = useState('');
