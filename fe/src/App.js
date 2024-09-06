@@ -6,10 +6,12 @@ function App() {
   const [code, setCode] = useState('');
 
   useEffect(() => {
+    // Listen for code changes from other clients
     const unsubscribe = listenForCodeChanges((newCode) => {
       setCode(newCode);
     });
 
+    // Clean up listener on component unmount
     return () => {
       unsubscribe();
     };
@@ -26,7 +28,7 @@ function App() {
         height="90vh"
         language="javascript"
         value={code} // Set the code as the value
-        onChange={(value, event) => handleChange(value)} // Handle code changes
+        onChange={(value) => handleChange(value)} // Handle code changes
         theme="vs-dark"
       />
     </div>
