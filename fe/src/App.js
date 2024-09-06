@@ -1,37 +1,34 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
-
 import { Editor } from '@monaco-editor/react';
-
-const socket = io('https://ide-tawny.vercel.app/');
+import { listenForCodeChanges, sendCodeChange } from './socketService';
 
 function App() {
   const [code, setCode] = useState('');
 
   useEffect(() => {
-    socket.on('codeChange', (newCode) => {
+    const unsubscribe = listenForCodeChanges((newCode) => {
       setCode(newCode);
     });
 
     return () => {
-      socket.off('codeChange');
+      unsubscribe();
     };
   }, []);
 
   const handleChange = (value) => {
     setCode(value);
-    socket.emit('codeChange', value);
+    sendCodeChange(value); // Emit the code change to the server
   };
 
   return (
     <div className="App">
       <Editor
-  height="90vh"
-  defaultLanguage="javascript"
-  defaultValue="// some code"
-  theme="vs-dark"
-/>
+        height="90vh"
+        language="javascript"
+        value={code} // Set the code as the value
+        onChange={(value, event) => handleChange(value)} // Handle code changes
+        theme="vs-dark"
+      />
     </div>
   );
 }
