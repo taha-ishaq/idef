@@ -1,42 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { MonacoEditor } from '@monaco-editor/react';
-import io from 'socket.io-client';
+import React, { useState, useEffect } from 'react';
+import { Editor } from '@monaco-editor/react';
+import { listenForCodeChanges, sendCodeChange } from './socketService';
 
-// Replace with your WebSocket server URL
-const socket = io('https://ide-tawny.vercel.app');
+function App() {
+  const [code, setCode] = useState('');
 
-// Replace with the session ID you want to join
-const sessionId = 'unique-session-id';
-
-const CodeEditor = () => {
-  const [code, setCode] = useState('// Start coding...');
-  
   useEffect(() => {
-    // Join session on connection
-    socket.emit('join', { sessionId });
-
-    socket.on('codeUpdate', (data) => {
-      setCode(data.code);
+    const unsubscribe = listenForCodeChanges((newCode) => {
+      setCode(newCode);
     });
 
     return () => {
-      socket.off('codeUpdate');
+      unsubscribe();
     };
   }, []);
 
-  const handleEditorChange = (value) => {
+  const handleChange = (value) => {
     setCode(value);
-    socket.emit('codeUpdate', { code: value, sessionId });
+    sendCodeChange(value); // Emit the code change to the server
   };
 
   return (
-    <MonacoEditor
-      height="90vh"
-      language="javascript"
-      value={code}
-      onChange={handleEditorChange}
-    />
+    <div className="App">
+      <Editor
+        height="90vh"
+        language="javascript"
+        value={code} // Set the code as the value
+        onChange={(value, event) => handleChange(value)} // Handle code changes
+        theme="vs-dark"
+      />
+    </div>
   );
-};
+}
 
-export default CodeEditor;
+export default App;
